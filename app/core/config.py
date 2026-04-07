@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     mongodb_url: str
     mongodb_db: str = "ip_tracker"
     ipwhois_base_url: str = "https://ipwhois.is"
+    redis_url: str = "redis://localhost:6379/0"
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
