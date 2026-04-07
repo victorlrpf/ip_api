@@ -1,4 +1,5 @@
 from app.core.database import get_ips_collection
+from datetime import datetime
 
 
 class IPRepository:
@@ -29,3 +30,24 @@ class IPRepository:
         )
 
         return list(cursor)
+
+    def list_all_ips(self):
+        cursor = self.collection.find({}, {"_id": 0, "ip": 1})
+        return list(cursor)
+
+    def update_ip_data(self, ip: str, raw_data: dict, data: dict):
+        now = datetime.utcnow()
+
+        self.collection.update_one(
+            {"ip": ip},
+            {
+                "$set": {
+                    "raw_data": raw_data,
+                    "data": data,
+                    "updated_at": now,
+                    "last_sync_at": now,
+                }
+            }
+        )
+
+        return self.find_by_ip(ip)
