@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 
 
 class IPDataResponse(BaseModel):
@@ -14,7 +14,10 @@ class IPDataResponse(BaseModel):
     capital: Optional[str] = None
 
 
-class IPResponse(BaseModel):
+class IPItemResponse(BaseModel):
     ip: str
-    data: Optional[IPDataResponse] = None
-    message: Optional[str] = None
+    data: IPDataResponse
+
+
+class IPListResponse(BaseModel):
+    ips: List[IPItemResponse]
