@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     app_token: str
     mongodb_url: str
     mongodb_db: str = "ip_tracker"
-
+    ipwhois_base_url: str = "https://ipwhois.is"
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
