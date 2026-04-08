@@ -91,11 +91,11 @@ Em vez de um cache volátil, optei por persistir as consultas no MongoDB. Isso g
 ### 3. Processamento Assíncrono (Celery + Redis)
 As tarefas de atualização em massa são delegadas para workers em background. Isso evita que a API fique lenta ou sofra timeout ao processar grandes volumes de dados.
 
-### 4. Autenticação Híbrida Inteligente (Desafio Adicional)
+### 4. Autenticação Híbrida Inteligente
 Implementei uma camada de segurança no `app/core/seguranca.py` que aceita dois tipos de credenciais no header `Authorization: Bearer`:
 *   **Token Estático:** Para integrações legadas ou scripts administrativos.
 *   **JWT com Expiração (30 min):** Para acessos temporários e mais seguros, gerados através do novo endpoint `POST /auth/login`.
 Essa abordagem permite evoluir a segurança do projeto sem quebrar as integrações que já utilizavam o token fixo.
 
-### 5. Validação Rigorosa
+### 5. Validação 
 Uso de Pydantic para garantir que apenas dados válidos entrem no sistema e que as respostas sigam um contrato estrito com o cliente da API.
