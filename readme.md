@@ -11,7 +11,7 @@ Siga os passos abaixo para configurar e rodar a aplicação em seu ambiente loca
 ### 1. Clonar o Repositório e Acessar a Pasta
 ```bash
 git clone https://github.com/victorlrpf/ip_api
-cd ip_api-master
+cd ip_api
 ```
 
 ### 2. Configurar o Ambiente Virtual
