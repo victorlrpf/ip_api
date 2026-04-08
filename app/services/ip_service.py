@@ -1,72 +1,72 @@
 from fastapi import HTTPException, status
 
 from app.models.documento_ip import construcao_doc
-from app.repositories.repository_ip import IPRepository
-from app.services.ipwhois_service import IPWhoisService
-from app.utils.validador import validate_ip, validate_filter_ip
+from app.repositories.repository_ip import RepositorioIP
+from app.services.ipwhois_service import ServicoIPWhois
+from app.Utilidades.validador import validar_ip, validar_filtro_ip
 
 
-class IPService:
+class ServicoIP:
     def __init__(self):
-        self.repository = IPRepository()
-        self.ipwhois_service = IPWhoisService()
+        self.repositorio = RepositorioIP()
+        self.servico_ipwhois = ServicoIPWhois()
 
-    def create_or_get_ip(self, ip: str):
+    def criar_ou_obter_ip(self, ip: str):
         try:
-            normalized_ip = validate_ip(ip)
+            ip_normalizado = validar_ip(ip)
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=str(exc)
             ) from exc
 
-        existing = self.repository.encontrar_ip(normalized_ip)
-        if existing:
+        existente = self.repositorio.encontrar_ip(ip_normalizado)
+        if existente:
             return {
-                "ip": existing["ip"],
-                "data": existing.get("data", {})
+                "ip": existente["ip"],
+                "data": existente.get("data", {})
             }
 
-        raw_data = self.ipwhois_service.fetch_ip_data(normalized_ip)
-        mapped_data = self.ipwhois_service.map_ip_data(raw_data)
+        dados_brutos = self.servico_ipwhois.buscar_dados_ip(ip_normalizado)
+        dados_mapeados = self.servico_ipwhois.mapear_dados_ip(dados_brutos)
 
-        document = construcao_doc(
-            ip=normalized_ip,
-            raw_data=raw_data,
-            data=mapped_data
+        documento = construcao_doc(
+            ip=ip_normalizado,
+            raw_data=dados_brutos,
+            data=dados_mapeados
         )
 
-        saved = self.repository.create(document)
+        salvo = self.repositorio.criar(documento)
 
         return {
-            "ip": saved["ip"],
-            "data": saved.get("data", {})
+            "ip": salvo["ip"],
+            "data": salvo.get("data", {})
         }
 
-    def list_ips(self, page: int = 1, limit: int = 15, filter_ip: str | None = None):
-        if page < 1:
+    def listar_ips(self, pagina: int = 1, limite: int = 15, filtro_ip: str | None = None):
+        if pagina < 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="page deve ser maior ou igual a 1."
+                detail="pagina deve ser maior ou igual a 1."
             )
 
-        if limit < 1 or limit > 15:
+        if limite < 1 or limite > 15:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="limit deve estar entre 1 e 15."
+                detail="limite deve estar entre 1 e 15."
             )
 
         try:
-            if filter_ip:
-                validate_filter_ip(filter_ip)
+            if filtro_ip:
+                validar_filtro_ip(filtro_ip)
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(exc)
             ) from exc
 
-        items = self.repository.list_ips(page=page, limit=limit, filter_ip=filter_ip)
+        itens = self.repositorio.listar_ips(pagina=pagina, limite=limite, filtro_ip=filtro_ip)
 
         return {
-            "ips": items
+            "ips": itens
         }

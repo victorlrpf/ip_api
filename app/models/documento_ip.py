@@ -5,8 +5,8 @@ def construcao_doc(ip: str, raw_data: dict | None = None, data: dict | None = No
     now = datetime.utcnow()
     return {
         "ip": ip,
-        "raw_data": raw_data or {},
-        "data": data or {},
+        "raw_data": raw_data,
+        "data": data,
         "created_at": now,
         "updated_at": now,
         "last_sync_at": now,

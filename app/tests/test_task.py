@@ -1,9 +1,9 @@
-from app.workers.tasks import refresh_all_ips_task
+from app.workers.tasks import tarefa_atualizar_todos_ips
 
 
-def test_refresh_all_ips_task_success(mocker):
+def test_tarefa_atualizar_todos_ips_sucesso(mocker):
     mocker.patch(
-        "app.workers.tasks.IPRepository.list_all_ips",
+        "app.workers.tasks.RepositorioIP.listar_todos_ips",
         return_value=[
             {"ip": "8.8.8.8"},
             {"ip": "1.1.1.1"}
@@ -11,7 +11,7 @@ def test_refresh_all_ips_task_success(mocker):
     )
 
     mocker.patch(
-        "app.workers.tasks.IPWhoisService.fetch_ip_data",
+        "app.workers.tasks.ServicoIPWhois.buscar_dados_ip",
         side_effect=[
             {
                 "ip": "8.8.8.8",
@@ -41,7 +41,7 @@ def test_refresh_all_ips_task_success(mocker):
     )
 
     mocker.patch(
-        "app.workers.tasks.IPWhoisService.map_ip_data",
+        "app.workers.tasks.ServicoIPWhois.mapear_dados_ip",
         side_effect=[
             {
                 "type": "IPv4",
@@ -68,28 +68,28 @@ def test_refresh_all_ips_task_success(mocker):
         ]
     )
 
-    update_mock = mocker.patch(
-        "app.workers.tasks.IPRepository.update_ip_data"
+    mock_atualizacao = mocker.patch(
+        "app.workers.tasks.RepositorioIP.atualizar_dados_ip"
     )
 
-    result = refresh_all_ips_task()
+    resultado = tarefa_atualizar_todos_ips()
 
-    assert result["total"] == 2
-    assert result["updated"] == 2
-    assert result["failed"] == 0
-    assert update_mock.call_count == 2
+    assert resultado["total"] == 2
+    assert resultado["atualizados"] == 2
+    assert resultado["falhas"] == 0
+    assert mock_atualizacao.call_count == 2
 
 
-def test_refresh_all_ips_task_partial_failure(mocker):
+def test_tarefa_atualizar_todos_ips_falha_parcial(mocker):
     mocker.patch(
-        "app.workers.tasks.IPRepository.list_all_ips",
+        "app.workers.tasks.RepositorioIP.listar_todos_ips",
         return_value=[
             {"ip": "8.8.8.8"},
             {"ip": "1.1.1.1"}
         ]
     )
 
-    def fetch_side_effect(ip):
+    def efeito_colateral_busca(ip):
         if ip == "8.8.8.8":
             return {
                 "ip": ip,
@@ -106,12 +106,12 @@ def test_refresh_all_ips_task_partial_failure(mocker):
         raise Exception("Falha simulada")
 
     mocker.patch(
-        "app.workers.tasks.IPWhoisService.fetch_ip_data",
-        side_effect=fetch_side_effect
+        "app.workers.tasks.ServicoIPWhois.buscar_dados_ip",
+        side_effect=efeito_colateral_busca
     )
 
     mocker.patch(
-        "app.workers.tasks.IPWhoisService.map_ip_data",
+        "app.workers.tasks.ServicoIPWhois.mapear_dados_ip",
         return_value={
             "type": "IPv4",
             "continent": "North America",
@@ -125,8 +125,8 @@ def test_refresh_all_ips_task_partial_failure(mocker):
         }
     )
 
-    result = refresh_all_ips_task()
+    resultado = tarefa_atualizar_todos_ips()
 
-    assert result["total"] == 2
-    assert result["updated"] == 1
-    assert result["failed"] == 1
+    assert resultado["total"] == 2
+    assert resultado["atualizados"] == 1
+    assert resultado["falhas"] == 1

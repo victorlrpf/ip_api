@@ -1,22 +1,22 @@
 from celery.utils.log import get_task_logger
 
-from app.repositories.repository_ip import IPRepository
-from app.services.ipwhois_service import IPWhoisService
+from app.repositories.repository_ip import RepositorioIP
+from app.services.ipwhois_service import ServicoIPWhois
 from app.workers.celery_app import celery_app
 
 logger = get_task_logger(__name__)
 
 
-@celery_app.task(name="app.workers.tasks.refresh_all_ips_task")
-def refresh_all_ips_task():
-    repository = IPRepository()
-    ipwhois_service = IPWhoisService()
+@celery_app.task(name="app.workers.tasks.tarefa_atualizar_todos_ips")
+def tarefa_atualizar_todos_ips():
+    repositorio = RepositorioIP()
+    servico_ipwhois = ServicoIPWhois()
 
-    ips = repository.list_all_ips()
+    ips = repositorio.listar_todos_ips()
 
     total = len(ips)
-    updated = 0
-    failed = 0
+    atualizados = 0
+    falhas = 0
 
     logger.info("Iniciando atualização periódica de %s IPs.", total)
 
@@ -24,27 +24,27 @@ def refresh_all_ips_task():
         ip = item["ip"]
 
         try:
-            raw_data = ipwhois_service.fetch_ip_data(ip)
-            mapped_data = ipwhois_service.map_ip_data(raw_data)
+            dados_brutos = servico_ipwhois.buscar_dados_ip(ip)
+            dados_mapeados = servico_ipwhois.mapear_dados_ip(dados_brutos)
 
-            repository.update_ip_data(
+            repositorio.atualizar_dados_ip(
                 ip=ip,
-                raw_data=raw_data,
-                data=mapped_data
+                dados_brutos=dados_brutos,
+                dados=dados_mapeados
             )
 
-            updated += 1
+            atualizados += 1
             logger.info("IP %s atualizado com sucesso.", ip)
 
         except Exception as exc:
-            failed += 1
+            falhas += 1
             logger.exception("Falha ao atualizar IP %s: %s", ip, exc)
 
-    result = {
+    resultado = {
         "total": total,
-        "updated": updated,
-        "failed": failed,
+        "atualizados": atualizados,
+        "falhas": falhas,
     }
 
-    logger.info("Atualização periódica finalizada: %s", result)
-    return result
+    logger.info("Atualização periódica finalizada: %s", resultado)
+    return resultado

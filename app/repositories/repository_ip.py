@@ -2,52 +2,52 @@ from app.core.database import get_ips_collection
 from datetime import datetime
 
 
-class IPRepository:
+class RepositorioIP:
     def __init__(self):
-        self.collection = get_ips_collection()
+        self.colecao = get_ips_collection()
 
     def encontrar_ip(self, ip: str):
-        return self.collection.find_one({"ip": ip}, {"_id": 0})
+        return self.colecao.find_one({"ip": ip}, {"_id": 0})
 
-    def create(self, document: dict):
-        self.collection.insert_one(document)
-        return self.encontrar_ip(document["ip"])
+    def criar(self, documento: dict):
+        self.colecao.insert_one(documento)
+        return self.encontrar_ip(documento["ip"])
 
-    def list_ips(self, page: int = 1, limit: int = 15, filter_ip: str | None = None):
-        query = {}
+    def listar_ips(self, pagina: int = 1, limite: int = 15, filtro_ip: str | None = None):
+        consulta = {}
 
-        if filter_ip:
-            query["ip"] = {"$regex": f"^{filter_ip}"}
+        if filtro_ip:
+            consulta["ip"] = {"$regex": f"^{filtro_ip}"}
 
-        skip = (page - 1) * limit
+        pular = (pagina - 1) * limite
 
         cursor = (
-            self.collection
-            .find(query, {"_id": 0, "ip": 1, "data": 1})
+            self.colecao
+            .find(consulta, {"_id": 0, "ip": 1, "data": 1})
             .sort("ip", 1)
-            .skip(skip)
-            .limit(limit)
+            .skip(pular)
+            .limit(limite)
         )
 
         return list(cursor)
 
-    def list_all_ips(self):
-        cursor = self.collection.find({}, {"_id": 0, "ip": 1})
+    def listar_todos_ips(self):
+        cursor = self.colecao.find({}, {"_id": 0, "ip": 1})
         return list(cursor)
 
-    def update_ip_data(self, ip: str, raw_data: dict, data: dict):
-        now = datetime.utcnow()
+    def atualizar_dados_ip(self, ip: str, dados_brutos: dict, dados: dict):
+        agora = datetime.utcnow()
 
-        self.collection.update_one(
+        self.colecao.update_one(
             {"ip": ip},
             {
                 "$set": {
-                    "raw_data": raw_data,
-                    "data": data,
-                    "updated_at": now,
-                    "last_sync_at": now,
+                    "raw_data": dados_brutos,
+                    "data": dados,
+                    "updated_at": agora,
+                    "last_sync_at": agora,
                 }
             }
         )
 
-        return self.find_by_ip(ip)
+        return self.encontrar_ip(ip)

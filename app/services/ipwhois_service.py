@@ -4,15 +4,15 @@ from fastapi import HTTPException, status
 from app.core.config import settings
 
 
-class IPWhoisService:
+class ServicoIPWhois:
     def __init__(self):
-        self.base_url = settings.ipwhois_base_url.rstrip("/")
+        self.url_base = settings.ipwhois_base_url.rstrip("/")
 
-    def fetch_ip_data(self, ip: str) -> dict:
-        url = f"{self.base_url}/{ip}"
+    def buscar_dados_ip(self, ip: str) -> dict:
+        url = f"{self.url_base}/{ip}"
 
         try:
-            response = httpx.get(
+            resposta = httpx.get(
                 url,
                 timeout=10.0,
                 follow_redirects=True,
@@ -28,33 +28,33 @@ class IPWhoisService:
                 detail="Falha de comunicação com serviço externo."
             ) from exc
 
-        if response.status_code >= 400:
+        if resposta.status_code >= 400:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Erro ao consultar serviço externo: {response.status_code} | URL: {url} | body: {response.text}"
+                detail=f"Erro ao consultar serviço externo: {resposta.status_code} | URL: {url} | corpo: {resposta.text}"
             )
 
-        data = response.json()
+        dados = resposta.json()
 
         # A documentação informa que alguns erros podem vir com HTTP 200
         # e success=false no corpo.
-        if data.get("success") is False:
+        if dados.get("success") is False:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=data.get("message", "Erro retornado pela API externa.")
+                detail=dados.get("message", "Erro retornado pela API externa.")
             )
 
-        return data
+        return dados
 
-    def map_ip_data(self, raw_data: dict) -> dict:
+    def mapear_dados_ip(self, dados_brutos: dict) -> dict:
         return {
-            "type": raw_data.get("type"),
-            "continent": raw_data.get("continent"),
-            "continent_code": raw_data.get("continent_code"),
-            "country": raw_data.get("country"),
-            "country_code": raw_data.get("country_code"),
-            "region": raw_data.get("region"),
-            "region_code": raw_data.get("region_code"),
-            "city": raw_data.get("city"),
-            "capital": raw_data.get("capital"),
+            "type": dados_brutos.get("type"),
+            "continent": dados_brutos.get("continent"),
+            "continent_code": dados_brutos.get("continent_code"),
+            "country": dados_brutos.get("country"),
+            "country_code": dados_brutos.get("country_code"),
+            "region": dados_brutos.get("region"),
+            "region_code": dados_brutos.get("region_code"),
+            "city": dados_brutos.get("city"),
+            "capital": dados_brutos.get("capital"),
         }

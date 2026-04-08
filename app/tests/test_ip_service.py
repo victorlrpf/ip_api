@@ -1,40 +1,40 @@
 import pytest
 from fastapi import HTTPException
 
-from app.services.ip_service import IPService
+from app.services.ip_service import ServicoIP
 
 
-def test_list_ips_invalid_page():
-    service = IPService()
+def test_listar_ips_pagina_invalida():
+    servico = ServicoIP()
 
     with pytest.raises(HTTPException) as exc:
-        service.list_ips(page=0, limit=10)
+        servico.listar_ips(pagina=0, limite=10)
 
     assert exc.value.status_code == 400
 
 
-def test_list_ips_invalid_filter(mocker):
-    service = IPService()
+def test_listar_ips_filtro_invalido(mocker):
+    servico = ServicoIP()
 
     with pytest.raises(HTTPException) as exc:
-        service.list_ips(page=1, limit=10, filter_ip="x")
+        servico.listar_ips(pagina=1, limite=10, filtro_ip="x")
 
     assert exc.value.status_code == 400
 
 
-def test_create_or_get_ip_returns_existing_ip(mocker):
-    service = IPService()
+def test_criar_ou_obter_ip_retorna_ip_existente(mocker):
+    servico = ServicoIP()
 
     mocker.patch.object(
-        service.repository,
-        "find_by_ip",
+        servico.repositorio,
+        "encontrar_ip",
         return_value={
             "ip": "8.8.8.8",
             "data": {"country": "United States"}
         }
     )
 
-    result = service.create_or_get_ip("8.8.8.8")
+    resultado = servico.criar_ou_obter_ip("8.8.8.8")
 
-    assert result["ip"] == "8.8.8.8"
-    assert result["data"]["country"] == "United States"
+    assert resultado["ip"] == "8.8.8.8"
+    assert resultado["data"]["country"] == "United States"

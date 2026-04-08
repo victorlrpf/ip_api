@@ -1,29 +1,28 @@
 from fastapi import APIRouter, Depends, Query
-from app.core.seguranca import verify_token
+from app.core.seguranca import verificar_token
 from app.schemas.requesicao_ip import IPRequest
-from app.services.ip_service import IPService
-from app.workers.tasks import refresh_all_ips_task
+from app.services.ip_service import ServicoIP
+from app.workers.tasks import tarefa_atualizar_todos_ips
 
 router = APIRouter(prefix="/ips", tags=["IPs"])
-service = IPService()
+servico = ServicoIP()
 
-@router.post("", dependencies=[Depends(verify_token)])
-def create_ip(payload: IPRequest):
-    return service.create_or_get_ip(payload.ip)
+@router.post("", dependencies=[Depends(verificar_token)])
+def criar_ip(payload: IPRequest):
+    return servico.criar_ou_obter_ip(payload.ip)
 
-
-@router.get("", dependencies=[Depends(verify_token)])
-def get_ips(
-    page: int = Query(default=1, ge=1),
-    limit: int = Query(default=15, ge=1, le=15),
-    filter_ip: str | None = Query(default=None)
+@router.get("", dependencies=[Depends(verificar_token)])
+def listar_ips(
+    pagina: int = Query(default=1, ge=1),
+    limite: int = Query(default=15, ge=1, le=15),
+    filtro_ip: str | None = Query(default=None)
 ):
-    return service.list_ips(page=page, limit=limit, filter_ip=filter_ip)
+    return servico.listar_ips(pagina=pagina, limite=limite, filtro_ip=filtro_ip)
 
-@router.post("/refresh", dependencies=[Depends(verify_token)])
-def refresh_ips_manually():
-    task = refresh_all_ips_task.delay()
+@router.post("/refresh", dependencies=[Depends(verificar_token)])
+def atualizar_ips_manualmente():
+    tarefa = tarefa_atualizar_todos_ips.delay()
     return {
         "message": "Atualização enfileirada com sucesso.",
-        "task_id": task.id
+        "task_id": tarefa.id
     }
