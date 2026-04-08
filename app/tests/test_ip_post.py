@@ -15,7 +15,7 @@ def test_post_ips_returns_existing_ip(client, auth_headers, mocker):
     }
 
     mocker.patch(
-        "app.services.ip_service.IPRepository.find_by_ip",
+        "app.services.ip_service.IPRepository.encontrar_ip",
         return_value=existing_ip
     )
 
@@ -33,7 +33,7 @@ def test_post_ips_returns_existing_ip(client, auth_headers, mocker):
 
 def test_post_ips_fetches_and_saves_when_ip_not_exists(client, auth_headers, mocker):
     mocker.patch(
-        "app.services.ip_service.IPRepository.find_by_ip",
+        "app.services.ip_service.IPRepository.encontrar_ip",
         side_effect=[None, {
             "ip": "8.8.8.8",
             "data": {
