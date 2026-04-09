@@ -58,8 +58,11 @@ Certifique-se de ter o Docker rodando para subir o Banco de Dados e o Broker:
 ```bash
 docker-compose up -d
 ```
+Isso iniciará:
+MongoDB → porta 27017
+Redis → porta 6379
 
-### 6. Executar a Aplicação e Workers (particularmente prefiro esse)
+### 6. Executar a Aplicação e Workers
 Em terminais separados, execute:
 * **API:** `uvicorn app.main:app --reload`
 * **Worker:** `celery -A app.workers.celery_app.celery_app worker --loglevel=info`
