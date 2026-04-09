@@ -59,7 +59,7 @@ Certifique-se de ter o Docker rodando para subir o Banco de Dados e o Broker:
 docker-compose up -d
 ```
 
-### 6. Executar a Aplicação e Workers
+### 6. Executar a Aplicação e Workers (particularmente prefiro esse)
 Em terminais separados, execute:
 * **API:** `uvicorn app.main:app --reload`
 * **Worker:** `celery -A app.workers.celery_app.celery_app worker --loglevel=info`
